@@ -1,11 +1,11 @@
-# security group for efs access
-resource "aws_security_group" "this" {
-  name        = "${local.name}-efs"
-  description = "${local.name} EFS SG"
+# security/firewall
+resource "aws_security_group" "efs" {
+  name        = "${local.name}"
+  description = "security group for ${local.name}"
   vpc_id      = "${var.vpc}"
 
   tags {
-    Name = "${local.name}-efs"
+    Name = "${local.name}"
   }
 }
 
@@ -17,7 +17,7 @@ resource "aws_security_group_rule" "ingress_rules" {
   to_port           = "${element(var.ingress_rules[count.index], 2)}"
   protocol          = "${element(var.ingress_rules[count.index], 3)}"
   description       = "${element(var.ingress_rules[count.index], 4)}"
-  security_group_id = "${aws_security_group.this.id}"
+  security_group_id = "${aws_security_group.efs.id}"
 }
 
 resource "aws_security_group_rule" "egress_rules" {
@@ -28,20 +28,20 @@ resource "aws_security_group_rule" "egress_rules" {
   to_port           = "${element(var.egress_rules[count.index], 2)}"
   protocol          = "${element(var.egress_rules[count.index], 3)}"
   description       = "${element(var.egress_rules[count.index], 4)}"
-  security_group_id = "${aws_security_group.this.id}"
+  security_group_id = "${aws_security_group.efs.id}"
 }
 
 # efs instance
 
-resource "aws_efs_file_system" "this" {
+resource "aws_efs_file_system" "efs" {
   tags {
     Name = "${local.name}"
   }
 }
 
-resource "aws_efs_mount_target" "this" {
+resource "aws_efs_mount_target" "efs" {
   count           = "${length(split(",", var.subnets))}"
-  file_system_id  = "${aws_efs_file_system.this.id}"
-  security_groups = ["${aws_security_group.this.id}"]
+  file_system_id  = "${aws_efs_file_system.efs.id}"
+  security_groups = ["${aws_security_group.efs.id}"]
   subnet_id       = "${element(split(",", var.subnets), count.index)}"
 }

@@ -10,6 +10,6 @@ resource "random_string" "this" {
 
 ### frigga naming rule
 locals {
-  name       = "${join("-", compact(list(var.name, var.stack, var.detail, local.slug)))}"
-  slug           = "${var.slug == "" ? random_string.this.result : var.slug}"
+  name = "${join("-", compact(list(var.name, var.stack, var.detail, local.slug, "efs")))}"
+  slug = "${var.slug == "" ? random_string.this.result : var.slug}"
 }
